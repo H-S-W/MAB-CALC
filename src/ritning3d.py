@@ -508,27 +508,96 @@ def geometri(res, cfg, detalj=True):
 LUGN_ZOOM = """
 var gd = document.getElementById('{plot_id}');
 var LUGN = 10;
-gd.addEventListener('wheel', function (e) {
-  if (e.__lugn) { return; }
-  e.preventDefault();
-  e.stopImmediatePropagation();
+
+// All zoom gar genom EN vag: steg i "hjulklick" (positivt = ut).
+// Perspektiv: dampat wheel-event till plotly. Ortografiskt: plotlys
+// zoom ar ett FAST steg per event oavsett delta, sa dar skalas
+// aspectratio direkt med tiondelssteg -- samma mekanism som plotly.
+function zooma(steg, cx, cy) {
   try {
     var scen = gd._fullLayout.scene && gd._fullLayout.scene._scene;
     if (scen && scen.camera && scen.camera._ortho) {
-      var s = Math.pow(e.deltaX > e.deltaY ? 1.1 : 1 / 1.1, 1 / LUGN);
+      var s = Math.pow(1.1, steg / LUGN);
       var l = scen.glplot.getAspectratio();
       scen.glplot.setAspectratio({ x: s * l.x, y: s * l.y, z: s * l.z });
       return;
     }
-  } catch (fel) { /* fall vidare till vanliga vagen */ }
+  } catch (fel) { /* fall vidare till wheel-vagen */ }
+  var mal = gd.querySelector('canvas') || gd;
+  var r = mal.getBoundingClientRect();
   var ev = new WheelEvent('wheel', {
-    deltaY: e.deltaY / LUGN, deltaX: e.deltaX / LUGN,
-    deltaMode: e.deltaMode,
-    clientX: e.clientX, clientY: e.clientY,
+    deltaY: 100 * steg / LUGN, deltaX: 0,
+    clientX: cx != null ? cx : r.left + r.width / 2,
+    clientY: cy != null ? cy : r.top + r.height / 2,
     bubbles: true, cancelable: true, view: window });
   ev.__lugn = true;
-  e.target.dispatchEvent(ev);
+  mal.dispatchEvent(ev);
+}
+
+// Mushjul: fanga, dampa, skicka genom zooma()
+gd.addEventListener('wheel', function (e) {
+  if (e.__lugn) { return; }
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  zooma(e.deltaY / 100, e.clientX, e.clientY);
 }, { capture: true, passive: false });
+
+// Pinch pa touchskarm: plotlys 3D-lage saknar den helt. Tva fingrar
+// foljs via pointer events och avstandsandringen blir zoomsteg.
+var pekare = new Map();
+var pinchAvstand = null;
+gd.addEventListener('pointerdown', function (e) {
+  if (e.pointerType === 'touch') {
+    pekare.set(e.pointerId, [e.clientX, e.clientY]);
+    pinchAvstand = null;
+  }
+});
+gd.addEventListener('pointermove', function (e) {
+  if (e.pointerType !== 'touch' || !pekare.has(e.pointerId)) { return; }
+  pekare.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pekare.size !== 2) { return; }
+  var pts = Array.from(pekare.values());
+  var d = Math.hypot(pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]);
+  if (pinchAvstand !== null && d > 0) {
+    zooma((pinchAvstand - d) / 4,
+          (pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2);
+    e.preventDefault();
+  }
+  pinchAvstand = d;
+}, { passive: false });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(function (typ) {
+  gd.addEventListener(typ, function (e) {
+    pekare.delete(e.pointerId);
+    pinchAvstand = null;
+  });
+});
+
+// +/- -knappar (touchvanliga, hall inne for kontinuerlig zoom)
+var rad = document.createElement('div');
+rad.style.cssText = 'position:absolute;right:12px;bottom:16px;' +
+  'display:flex;flex-direction:column;gap:8px;z-index:1000;';
+[['+', -5], ['\u2212', 5]].forEach(function (par) {
+  var b = document.createElement('button');
+  b.textContent = par[0];
+  b.setAttribute('aria-label', par[1] < 0 ? 'Zooma in' : 'Zooma ut');
+  b.style.cssText = 'width:44px;height:44px;border-radius:50%;' +
+    'border:1px solid #999;background:rgba(255,255,255,.88);' +
+    'font-size:24px;line-height:1;cursor:pointer;' +
+    'touch-action:manipulation;user-select:none;color:#333;';
+  var timer = null;
+  function starta(e) {
+    e.preventDefault();
+    zooma(par[1]);
+    timer = setInterval(function () { zooma(par[1]); }, 120);
+  }
+  function stoppa() { if (timer) { clearInterval(timer); timer = null; } }
+  b.addEventListener('pointerdown', starta);
+  ['pointerup', 'pointerleave', 'pointercancel']
+    .forEach(function (typ) { b.addEventListener(typ, stoppa); });
+  rad.appendChild(b);
+});
+gd.style.position = 'relative';
+gd.appendChild(rad);
 """
 
 
