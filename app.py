@@ -501,15 +501,24 @@ def visa_ritningar(res, cfg):
     # scrollzoomen dampas (ritning3d.LUGN_ZOOM). plotly.js laddas fran
     # appens egen statiska mapp, inte fran nagot CDN.
     import streamlit.components.v1 as components
+    # plotly.js: lokalt fran appens statiska mapp (inget natberoende),
+    # hostat fran plotlys CDN -- molnets routinglager serverar inte
+    # /app/static/-vagen in i komponent-iframen (3D-vyn blev tom dar,
+    # upptackt vid driftsattningen 2026-08-19).
     _pjs = Path(__file__).parent / "static" / "plotly.min.js"
+    if HOSTAT:
+        _plotlyjs = "cdn"
+    elif _pjs.exists():
+        _plotlyjs = "/app/static/plotly.min.js"
+    else:
+        _plotlyjs = True
     components.html(
         ritning3d.som_html(
             ritning3d.modell(res, cfg, detalj=detalj,
                              textstorlek=textstorlek,
                              visa_spikmatt=visa_spik,
                              visa_skivmatt=visa_skiva),
-            plotlyjs="/app/static/plotly.min.js" if _pjs.exists()
-            else True),
+            plotlyjs=_plotlyjs),
         height=590)
     fb = cfg["forband"]
     st.caption(
