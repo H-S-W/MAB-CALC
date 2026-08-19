@@ -1,0 +1,7 @@
+# Beroenden -- installeras med  pip install -r requirements.txt
+streamlit>=1.60
+matplotlib>=3.8
+numpy>=1.26
+plotly>=6.0
+requests>=2.31
+pytest>=8.0

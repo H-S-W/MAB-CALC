@@ -1,0 +1,252 @@
+# ---------------------------------------------------------------------------
+# PROJEKTDATA — sadeltak av lättbalk med momentstyv nock
+#
+# Materialvärdena ligger INTE här utan i input/material/, hämtade ur
+# ETA 12/0018 och EN 12369-1. Här står bara vad DET HÄR projektet är:
+# geometri, laster och vilka material som valts ur biblioteken.
+#
+# Lastvärdena nedan är fortfarande PLATSHÅLLARE. Ersätt med projektets egna.
+# ---------------------------------------------------------------------------
+
+[projekt]
+namn = "Sadeltak lattbalk"
+sakerhetsklass = 3        # 1, 2 eller 3 -> gamma_d 0.83 / 0.91 / 1.00
+klimatklass = 1           # 1 = uppvarmt inomhus, 2 = ventilerat kallutrymme
+lastvaraktighet = "medel" # styr k_mod. Snölast är medellång i Sverige.
+
+[geometri]
+spannvidd = 10.0          # m, mellan upplagens centrum        PLATSHALLARE
+taklutning = 27.0         # grader                             PLATSHALLARE
+cc = 0.6                  # m, c/c mellan takstolar
+balk = "H300"             # beteckning i input/material/balkar.toml
+
+# Sidostöd av tryckflänsen, ETA annex 3 tab. 19. Den deklarerade
+# momentkapaciteten gäller BARA om tryckflänsen är sidostödd så här tätt:
+# H 350 mm, HM 500, HI 600, HB 1000.
+cc_lakt = 0.3             # m, c/c mellan taklakt = stöd av ÖVERflänsen
+sidostod_underflans = 0.0 # mm, 0 = inget stöd av underflänsen
+                          # I en momentstyv nock är underflänsen tryckt i
+                          # nockområdet. Är det här 0 varnar programmet.
+
+# ---------------------------------------------------------------------------
+# DIMENSIONERINGSVAL
+#
+# Det här är storheter som INTE är deklarerade i ETA:n och som du därför
+# äger. Varje rad har sin källa. Ändrar du någon av dem ändras resultatet,
+# så de redovisas bland antagandena.
+# ---------------------------------------------------------------------------
+
+[dimensionering]
+# ETA 12/0018 deklarerar ingen partialkoefficient — det är ett nationellt
+# val. Handboken räknar med gamma_m = 1,3 i sitt eget exempel 5.2.2.1
+# (s. 232). Att 1,3 är rimligt stöds av att ETA tab. 17:s k_mod för böjning
+# är EC5 tab. 3.1:s rad för MASSIVT TRÄ, dvs böjning behandlas som ett
+# flänsbrott — och gamma_M för massivt trä är 1,3 enligt EC5 tab. 2.3.
+gamma_M_balk = 1.30
+
+# EN 1995-1-1 ekv. 6.29: beta_c = 0,2 för massivt trä, 0,1 för limträ och
+# LVL. Flänsarna är massivt trä.
+beta_c = 0.20
+
+# EI i ETA tab. 11 är räknad med flänsens MEDELelasticitetsmodul (tab. 5,
+# 13 000 MPa för C30+). EN 1995-1-1 6.3.2 kräver 5-percentilen vid
+# knäckning, och ETA avsn. 1.2.4 säger uttryckligen hur den ska tas fram:
+#
+#   "To be calculated according to EC5 using strength and stiffness values
+#    in EN 338. For C30+ use the values for C30..."
+#
+# alltså E_0,05 = 8 000 MPa ur SS-EN 338:2016 för C30 — INTE 0,67 × 13 000
+# = 8 710, som vore att låna EN 338:s kvot men vägra dess nivå.
+#
+# 0 = härled ur biblioteket enligt ovan (rekommenderas). Ett angivet värde
+# överstyr och redovisas då som ditt eget antagande.
+E05_kvot = 0.0
+
+# Knäcklängd i takstolens plan, som andel av sparrelängden. 1,0 = sparren
+# räknas som ledad i båda ändar, vilket är det konservativa valet. En
+# momentstyv nock ger i praktiken viss inspänning, men hur mycket beror på
+# förbandets rotationsstyvhet — som inte är modellerad än.
+knacklangdsfaktor = 1.0
+
+[system]
+nock_styv = true          # true = momentstyv nock (tvaledsram)
+dragband = false          # true = dragband i takfotsniva
+upplag = "ledat"          # "ledat" eller "fast"
+
+# Nockförbandets ändliga rotationsstyvhet, K_r = sum(K * n_snitt * I_p) ur
+# EC5 tab. 7.1. En helt styv nock överskattar nockmomentet (konservativt
+# för förbandet) men underskattar fältmoment och nedböjning (okonservativt).
+# false = räkna helt styvt, som handboken.
+rotationsfjader = true
+
+# ---------------------------------------------------------------------------
+# UPPLAGET VID TAKFOTEN — ETA 12/0018 ekv. 3-5
+# ---------------------------------------------------------------------------
+
+[upplag]
+L1 = 45.0                 # mm, upplagslängd. 45 är minsta tillåtna.
+forstarkning = false      # livförstärkning vid upplaget (ETA fig. 3)
+punktlast_over_stod = false
+overhang_y = 0.0          # mm, balkens utstick utanför stödet
+
+# ---------------------------------------------------------------------------
+# NEDBÖJNINGSKRAV — handboken s. 229, se nedbojningskrav.toml
+# ---------------------------------------------------------------------------
+
+[nedbojning]
+byggnadstyp = "allmant_utan_tak"   # nyckel i nedbojningskrav.toml [tak]
+# Överhöjning. Handboken s. 229 och Limträhandboken tab. 6.1 tabellerar
+# EJ överhöjda element och anger "tabellvärdet/1,5" för överhöjda: kravet
+# SKÄRPS, vilket bara är meningsfullt mot NETTOnedböjningen. Anges
+# overhojd = true måste därför överhöjningens storlek anges också.
+# Se docs/ERRATA.md punkt 6 för tolkningen.
+overhojd = false
+# Överhöjningen kapas vid egentyngdens slutliga nedböjning (med krypning):
+# mer än så ger en uppåtbuktning och får inte tillgodoräknas
+# (Limträhandboken 6.2.4 s. 87). Överhöjningen lönar sig först när den
+# överstiger en tredjedel av nedböjningen, eftersom kravet samtidigt
+# skärps med 1,5.
+overhojd_mm = 0.0                  # mm, dras från den beräknade nedböjningen
+
+[laster.egentyngd]
+# kN/m2 av TAKYTA                                              PLATSHALLARE
+takpannor = 0.55
+lakt_strolakt = 0.06
+underlagstak = 0.12
+lattbalk = 0.05
+isolering = 0.12
+invandig_bekladnad = 0.15
+
+# ---------------------------------------------------------------------------
+# PLATSEN — hämtad ur Boverkets öppna API (BFS 2024:6 figur 4:2 och 4:3)
+#
+# EXEMPELPLATS: kustnära Västerbotten (Nordmalingstrakten). Koordinaten
+# är avrundad till närmaste hela kilometrar och pekar inte ut någon
+# fastighet — byt till projektets verkliga läge och kontrollera mot
+# karta. (Rensad från personuppgifter inför publik hosting 2026-08-19.)
+#
+# Kartbilderna får inte återges i projektet (9 § andra stycket
+# upphovsrättslagen undantar kartor), men ett värde för en punkt är ett
+# faktum. Hämta om med knappen i appen eller src/plats.py.
+#
+# Boverket anger att API-värdet är VÄGLEDNING: vid avvikelse gäller den
+# tryckta BFS 2024:6. Kvittera mot figur 4:2 och 4:3.
+# ---------------------------------------------------------------------------
+
+[plats]
+adress = "Exempelplats, kustnära Västerbotten"
+x_koord = 7054000                  # N (northing), SWEREF99 TM / EPSG:3006
+y_koord = 718000                   # E (easting),  SWEREF99 TM
+hoh = 15.0                         # m över havet   KONTROLLERA
+                                   # över 1 500 m gäller inte kartan (30 §)
+
+[plats.hamtat]
+S_0 = 3.5                          # kN/m2, BFS 2024:6 4 kap. 30 §, figur 4:2
+v_b = 23.0                         # m/s,   BFS 2024:6 4 kap. 35 §, figur 4:3
+apiversion = "v2"
+hamtat_datum = "2026-08-18"
+kalla = "Boverket, Klimatlaster. https://www.boverket.se/sv/om-boverket/oppna-data/klimatlaster-enligt-eks/"
+ringsampling = "3,5 kN/m2 i alla 6 punkter inom 2 km — ej nära zongräns"
+
+[laster.sno]
+# 0 = använd S_0 ur [plats.hamtat] (hämtat ur Boverkets karta för platsen).
+# Ett värde här överstyr alltid det hämtade.
+s_k = 0.0                 # kN/m2 på MARK, BFS 2024:6 4 kap. 30 §
+C_e = 1.0                 # exponeringsfaktor
+C_t = 1.0
+
+[laster.vind]
+# q_p läses ur EKS för terrängtyp och byggnadshöjd. c_pe läses ur
+# EN 1991-1-4 tab. 7.4a för taklutningen — tabellen ger BÅDA tecknen för
+# lutningar kring 15-45 grader och båda ska anges. c_pi enligt 7.2.9(6)
+# not 2 när öppningarna inte är kända. Vind från båda hållen provas
+# automatiskt. Sätt q_p = 0.0 för att stänga av vinden (ger en varning).
+# q_p räknas ur v_b enligt BFS 2024:6 4 kap. 38 § när [plats.hamtat] finns.
+# Sätt q_p > 0 här för att överstyra med ett eget värde.
+q_p = 0.0
+terrangtyp = "III"        # tab. 4:4: 0 / I / II / III / IV     PLATSHALLARE
+                          # III = byar, förorter, skogsmark. trakten ligger
+                          # vid kusten — II eller 0 kan vara riktigare, och
+                          # valet är RIKTNINGSBEROENDE. Din bedömning.
+referenshojd = 6.0        # m, z i 38 §                         PLATSHALLARE
+topografifaktor = 1.0     # c_0. 1,0 om topografin inte behöver beaktas (38 §)
+c_pe_lov = [0.2, -0.9]    # lovartsidan, båda tecknen          PLATSHALLARE
+c_pe_la = [-0.4]          # läsidan                            PLATSHALLARE
+c_pi = [0.2, -0.3]        # inre tryck
+
+# ---------------------------------------------------------------------------
+# MOMENTSTYVT NOCKFÖRBAND — skivor + förbindare
+#
+# Kapaciteten per förbindare räknas fram ur EN 1995-1-1 8.2.2, den anges
+# inte här. Antalet skjuvsnitt i livgruppen bestäms också av beräkningen:
+# dubbelsnitt om inträngningskravet i 8.3.1.1 uppfylls, annars enkelsnitt.
+# Det är därför den gamla nyckeln n_planes_liv är borta.
+# ---------------------------------------------------------------------------
+
+# LIM: förbandet räknas som SPIKAT. Monteringslim mellan skiva och balk
+# är ett utförandekrav som håller skivan på plats, inte en kapacitet, och
+# får INTE räknas ihop med spikarnas. Ska fogen bära genom limmet krävs
+# en limfog enligt EN 301 med kontrollerad temperatur, fukthalt,
+# presstryck och härdning — fabriksförhållanden — och då är hela den här
+# modellen (fjäder + spikkrafter) fel modell. Se CLAUDE.md.
+
+[forband]
+# NOCKFÖRBANDETS METOD — se docs/ERRATA.md punkt 7.
+#   "handbok"    exempel 5.3.4.1: hela spikbilden som EN grupp om fogens
+#                mitt. VALT 2026-08-18 därför att det kan finnas
+#                provningsunderlag bakom handbokens metod.
+#   "halvgrupp"  varje halvgrupp ensam, med snittkrafterna flyttade till
+#                dess tyngdpunkt. Det är den elastiska lösningen för en
+#                skarv och ger 2-2,5 gånger större spikkraft.
+# Båda räknas alltid; den ovalda redovisas som varning i varje körning.
+nockmetod = "handbok"
+
+skivmaterial = "plywood_handbok"   # "osb3", "p5" eller "plywood_handbok"
+skiva_t = 18.0                     # mm per skiva
+skiva_hojd_ytter = 300.0           # mm, over flansarna
+skiva_hojd_liv = 206.0             # mm, fri livhojd
+flanskvalitet = "C30plus"          # C30plus, C24plus eller C18
+
+forbindare_flans = "ankarspik_2_5x50"
+forbindare_liv = "ankarspik_2_5x50"
+cc_forbindare = 25.0               # mm
+rader_flans = 7                    # rader per halva i y-led
+kolumner_flans = 1                 # spikkolumner per flans. Zigzag enligt
+                                   # handboken s. 284 forutsatts alltid;
+                                   # en andra kolumn kraver 2*a4t + a2 =
+                                   # 19d <= 47 mm (tab. 8.2), dvs d <= 2,4
+                                   # -- annars varnar berakningen.
+kolumner_liv = 4
+# Spikmönster i livet: "kant" (FÖRVAL, användarbeslut 2026-08-19) eller
+# "rutnat" (fullt rutnät). "kant" är handbokens ramspikning (fig. 5.30
+# s. 289): rader längs skivans kanter + fulla kolumner de yttersta
+# rader_andblock raderna, tomt i mitten. Regeln återskapar exakt
+# handbokens n = 64 och I_p = 1,26e6 (låst av test). Förslagssökningen
+# provar alltid båda mönstren oavsett vad som står här.
+spikmonster = "kant"
+rader_andblock = 3
+rader_liv = 4
+
+# Handboken s. 290: halva normalkraften får tas av kontakt i foget om
+# spalten är högst 1,5 mm i medel och 3,0 mm som störst (EN 1995-1-1 8.8.5).
+# Regeln kommer från spikplåtsförband och tillämpas här per analogi, så den
+# redovisas som ett antagande. Gäller bara tryck.
+kontakt_i_foget = false
+
+# Spik fran motstaende sidor far inte sitta mitt for varandra:
+# flansspiken (50 mm genom 18 mm skiva) overlappar 17 mm inne i flansen
+# och livspiken delar samma genomgaende linje. Sida -Y forskjuts darfor
+# denna andel av c/c-avstandet LANGS BALKEN, fran fogen, I SJALVA
+# KOORDINATERNA -- berakning (I_p, K_r), skivlangder, ritning och CSV
+# raknar pa de verkliga lagena (anvandarbeslut 2026-08-19).
+# 0 = spegelplacerat (handbokens platta bild, aldre referenstal).
+sidoforskjutning = 0.5
+# Rastrets ankare. "flansvinkel" (användarbeslut 2026-08-19) lägger en
+# tvärlinje EXAKT genom vinkeln mellan undre flänsarna — (h/2)·tan(α)
+# från fogen längs balken, en punkt som går att känna på den färdiga
+# takstolen. Referenslinjen ritas heldragen i modellen; övriga
+# tvärlinjer ligger n·c/c från den. Kantkravet mot fogen uppfylls
+# alltid — rader snappas utåt, aldrig inåt. Tom sträng = ankra i fogen
+# med rutnat_bas i stället (0.5 = handbokens 12,5 + n·25; 1.0 = 25·n).
+rutnat_ankare = "flansvinkel"
+rutnat_bas = 1.0

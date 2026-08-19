@@ -1,0 +1,120 @@
+# ---------------------------------------------------------------------------
+# FÖRBINDARE
+#
+# Handboken s. 284: "In all examples a 2.5 x 50 nail has been used, but of
+# course another nail or screw can be used." Kapaciteten per förbindare
+# räknas därför fram ur EN 1995-1-1 8.2.2 och 8.3.1 i
+# src/forbindare_ec5.py — den ligger inte som ett fast tal i den här filen.
+#
+# Vad som ligger här är förbindarens EGNA egenskaper, alltså det som står i
+# tillverkarens deklaration. Kapaciteten beror sedan på vad den spikas i.
+#
+# f_u  trådets draghållfasthet [MPa]. EN 14592 kräver minst 600 MPa för
+#      spiktråd, och 600 är därför det konservativa utgångsvärdet. STÅR ETT
+#      HÖGRE VÄRDE I DEKLARATIONEN, ANVÄND DET — f_u går rakt in i
+#      flytmomentet, M_y,Rk = k * f_u * d^2,6 (ekv. 8.14).
+#
+# typ  styr två saker:
+#        M_y,Rk        koefficient 0,30 för runda, 0,45 för rillade och
+#                      kvadratiska (ekv. 8.14)
+#        inträngning   8d för släta, 6d för övriga (8.3.1.1)
+#      En ankarspik är ringad och räknas som "rillad". Är du osäker på om
+#      din spik kvalificerar, välj "rund" — det är den konservativa vägen.
+#
+# F_ax_Rk  karakteristisk utdragskapacitet [N] för repeffekten. 0 = ingen
+#          repeffekt. Kräver deklarerade utdragsparametrar enligt 8.3.2.
+#          Handboken räknar inte med repeffekt i sina exempel, så 0 är det
+#          spårbara valet.
+# ---------------------------------------------------------------------------
+
+[metadata]
+kalla_metod = "EN 1995-1-1 8.2.2 och 8.3.1"
+f_u_default_kalla = "EN 14592, minimikrav 600 MPa för spiktråd"
+gamma_M_forband = 1.30       # EN 1995-1-1 tab. 2.3, förband
+
+# ---------------------------------------------------------------------------
+# SPIK
+#
+# Beteckningen d x l. Ankarspik 2,5x50 är den handboken räknar med i
+# samtliga exempel i avsnitt 5.3.
+# ---------------------------------------------------------------------------
+
+[forbindare.ankarspik_2_5x50]
+namn = "Ankarspik 2,5x50"
+d = 2.5
+langd = 50.0
+f_u = 600.0
+typ = "rillad"
+forborrning = false
+F_ax_Rk = 0.0
+kommentar = "Handbokens referensspik i hela avsnitt 5.3"
+
+[forbindare.tradspik_2_5x50]
+namn = "Trådspik 2,5x50"
+d = 2.5
+langd = 50.0
+f_u = 600.0
+typ = "rund"
+forborrning = false
+F_ax_Rk = 0.0
+kommentar = "Slät spik. Ger F_v,Rd 0,370 kN mot flänsen, dvs närmast exakt handbokens antagna 0,36 kN"
+
+[forbindare.ankarspik_2_5x60]
+namn = "Ankarspik 2,5x60"
+d = 2.5
+langd = 60.0
+f_u = 600.0
+typ = "rillad"
+forborrning = false
+F_ax_Rk = 0.0
+
+[forbindare.ankarspik_3_1x75]
+namn = "Ankarspik 3,1x75"
+d = 3.1
+langd = 75.0
+f_u = 600.0
+typ = "rillad"
+forborrning = false
+F_ax_Rk = 0.0
+kommentar = "Grövre spik ger högre kapacitet per styck men kräver större c/c: a1 = 31 mm mot 25 mm"
+
+[forbindare.ankarspik_3_4x90]
+namn = "Ankarspik 3,4x90"
+d = 3.4
+langd = 90.0
+f_u = 600.0
+typ = "rillad"
+forborrning = false
+F_ax_Rk = 0.0
+
+[forbindare.tradspik_4_0x100]
+namn = "Trådspik 4,0x100"
+d = 4.0
+langd = 100.0
+f_u = 600.0
+typ = "rund"
+forborrning = false
+F_ax_Rk = 0.0
+kommentar = "a1 = 40 mm. Kontrollera minsta trätjocklek mot sprickning: (13d-30)*rho_k/400 blir dimensionerande över d = 2,3 mm"
+
+# ---------------------------------------------------------------------------
+# SKRUV — INTE IMPLEMENTERAD
+#
+# EN 1995-1-1 8.7.1 låter skruvar med ytterdiameter d <= 6 mm räknas med
+# spikreglerna i 8.2, men då ska en EFFEKTIV diameter d_ef användas i
+# stället för ytterdiametern, och för grövre skruvar gäller egna regler.
+# Utdragskapaciteten enligt 8.7.2 är dessutom ofta det som styr för skruv,
+# inte skjuvningen.
+#
+# Att köra en skruv genom spikformlerna med ytterdiametern överskattar
+# kapaciteten. Modulen har därför ingen skruvgren, och den här filen har
+# inga skruvposter. docs/ERRATA.md metodanmärkning gäller också här:
+# grova skruvar är sprödare än spik, så summationen av gruppernas
+# kapaciteter blir mindre försvarbar.
+#
+# Ska skruv in behövs d_ef ur deklarationen och 8.7.1/8.7.2 implementerade.
+# ---------------------------------------------------------------------------
+
+[ej_implementerat]
+skruv = "Kräver d_ef och EN 1995-1-1 8.7.1/8.7.2, se kommentar ovan"
+forborrade_hal = "f_h enligt ekv. 8.16 finns, men tab. 8.2:s avståndskrav för förborrade hål saknas"

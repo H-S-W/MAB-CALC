@@ -1,0 +1,132 @@
+# ---------------------------------------------------------------------------
+# TILLÅTEN NEDBÖJNING
+#
+# KÄLLA: The I-joist Handbook 2022, s. 229, tabellen "Constructions without
+# precamber". Handboken anger i sin tur Svenskt trä, Limträhandboken del 2
+# s. 89 som källa.
+#
+# Gränserna anges som L/n där L är den FRIA spännvidden. Är konstruktionen
+# överhöjd ska tabellvärdet delas med 1,5 enligt handbokens fotnot.
+#
+# De tre kolumnerna svarar mot olika lastkombinationer:
+#   u_inst   SS-EN 1990 ekv. 6.14a (karakteristisk) och kvasipermanent,
+#            med SS-EN 1995 2.2.3(2)
+#   u_freq   SS-EN 1990 ekv. 6.15a (frekvent). Handbokens fotnot: SS-EN 1995
+#            ger inga riktlinjer för den här; den räknas enligt
+#            Limträhandboken del 2 ekv. 6.8 s. 86 (verifierad mot
+#            docs/Limtrahandbok-del-2-2018.pdf s. 86-89): momentan
+#            nedböjning av G + psi_1,1*Q_1 + sum(psi_2,i*Q_i).
+#   u_fin    SS-EN 1990 ekv. 6.16a (kvasipermanent) med SS-EN 1995
+#            2.2.3(3) och (5)
+#
+# null = handboken anger inget värde för den kombinationen.
+# max_mm = absolut tak i mm utöver L/n-kravet.
+#
+# ---------------------------------------------------------------------------
+
+[metadata]
+kalla = "The I-joist Handbook 2022, s. 229"
+kalla_bakom = "Svenskt tra, Limtrahandboken del 2, s. 89"
+overhojd_faktor = 1.5      # tabellvärdet delas med detta vid överhöjning
+avlast_av_claude = "2026-08-17"
+
+# ---------------------------------------------------------------------------
+# TAKKONSTRUKTIONER
+# ---------------------------------------------------------------------------
+
+[tak.industri]
+namn = "Industribyggnad"
+u_inst = 300
+u_freq = 300
+u_fin = 250
+
+[tak.skola_kontor]
+namn = "Skola, kontor och liknande"
+u_inst = 375
+u_freq = 375
+u_fin = 300
+
+[tak.djurstall]
+namn = "Djurstall"
+u_inst = 0                 # 0 = handboken anger inget varde
+u_freq = 200
+u_fin = 200
+u_fin_max_mm = 30
+
+[tak.maskinhall]
+namn = "Maskinhall, loge och liknande"
+u_inst = 0
+u_freq = 150
+u_fin = 150
+u_fin_max_mm = 40
+
+[tak.allmant_utan_tak]
+namn = "Allmant, utan separat innertak"
+u_inst = 375
+u_freq = 375
+u_fin = 300
+
+[tak.lantbruk_utan_tak]
+namn = "Lantbruksbyggnad, utan separat innertak"
+u_inst = 0
+u_freq = 200
+u_fin = 0
+
+[tak.allmant_med_tak]
+namn = "Allmant, med separat innertak"
+u_inst = 200
+u_freq = 200
+u_fin = 150
+
+[tak.lantbruk_med_tak]
+namn = "Lantbruksbyggnad, med separat innertak"
+u_inst = 0
+u_freq = 100
+u_fin = 0
+
+# ---------------------------------------------------------------------------
+# BJÄLKLAG (underram i ramverkstakstol b1, vindsbjälklag)
+#
+# Raderna uteslöts först för att kolumnindelningen i handbokens tryckta
+# tabell inte gick att läsa av entydigt. Den tveksamheten är UPPLÖST
+# 2026-08-18 genom korsprövning mot källan bakom, Limträhandbok del 2
+# tab. 6.1 s. 89, som har samma fyra rader med identiska värden och
+# tydligare sättning:
+#
+#   handboken s. 229 "Floor structures"     Limträhandbok tab. 6.1 "Golvbalkar"
+#   General            L/500 L/375 L/300    Generellt          L/500 L/375 L/300
+#   Storehouses...     L/275 L/250 L/200    Förråd...          L/275 L/250 L/200
+#   Animal stables     -     L/200 L/200    Djurstallar        -     L/200 L/200
+#   Barn etc.          -     L/150 L/150    Logar med mera     -     L/150 L/150
+#
+# VIBRATIONER: båda källornas fotnot kräver att träbjälklag också
+# kontrolleras för svikt och vibrationer (EC5 7.3, f_1 >= 8 Hz).
+# Det gör programmet INTE. Använder du de här kraven för ett bjälklag
+# som folk går på, är nedböjningen bara halva kontrollen.
+# ---------------------------------------------------------------------------
+
+[bjalklag.allmant]
+namn = "Bjalklag, generellt"
+u_inst = 500
+u_freq = 375
+u_fin = 300
+
+[bjalklag.forrad]
+namn = "Forrad och lokaler utan tilltrade for allmanheten"
+u_inst = 275
+u_freq = 250
+u_fin = 200
+
+[bjalklag.djurstall]
+namn = "Bjalklag i djurstall"
+u_inst = 0
+u_freq = 200
+u_fin = 200
+u_fin_max_mm = 30
+
+[bjalklag.loge]
+namn = "Loge och liknande"
+u_inst = 0
+u_freq = 150
+u_fin = 150
+u_fin_max_mm = 40

@@ -1,0 +1,16 @@
+# Genererat/lokalt -- ska inte till GitHub
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Upphovsrattsskyddade dokument (handboken, ETA:n) -- hall repot rent
+*.pdf
+
+# Anvandarens session -- personlig indata, aldrig i repot
+input/.senaste_session.json
+
+# Streamlit-hemligheter (om nagra tillkommer)
+.streamlit/secrets.toml
+
+# Genererade exporter
+csv_ut/

@@ -1,0 +1,488 @@
+# ---------------------------------------------------------------------------
+# LÄTTBALKAR — deklarerade värden ur tillverkarens ETA
+#
+# KÄLLA: Masonite Beams ETA 12/0018, utgiven 2023-10-26 av RISE Research
+#        Institutes of Sweden AB, mot EAD 130367-00-0304 "Composite
+#        wood-based beams and columns". Ersätter ETA 12/0018 av 2023-05-11.
+#        Dokumentets löpnummer: 1220846. 22 sidor inkl. 3 annex.
+#
+# Handboken (The I-joist Handbook, 1:a uppl. 2022) publicerar INTE dessa
+# värden utan hänvisar till ETA:n, se handboken s. 42 och s. 43. Notera att
+# handboken s. 36 anger ETA 08/0012 medan s. 42-43 anger ETA 12/0018 — det
+# är 12/0018 som är den gällande, och den som gäller för värdena nedan.
+#
+# INGA VÄRDEN I DEN HÄR FILEN ÄR PLATSHÅLLARE. Varje tal är avläst ur
+# ETA:ns tabeller och tabellnumret står vid varje block. Undantagen är
+# uttryckligen märkta med SAKNAS eller HÄRLETT.
+# ---------------------------------------------------------------------------
+
+[metadata]
+kalla = "Masonite Beams ETA 12/0018, 2023-10-26 (RISE)"
+ead = "EAD 130367-00-0304"
+tillverkare = "Masonite Beams AB, Rundvik"
+klimatklasser = [1, 2]          # ETA avsn. 2: begränsat till klimatklass 1 och 2
+avlast_av_claude = "2026-08-17"
+
+# ---------------------------------------------------------------------------
+# FLÄNSMATERIAL — ETA tab. 4 (f_m,k) och tab. 5 (E_f)
+#
+# f_m,k är den karakteristiska böjhållfastheten som motsvarar spänningen i
+# flänsens yttersta fiber, angiven för balkhöjd 300 mm.
+# E_f är flänsens elasticitetsmodul, MEDELVÄRDE.
+#
+# ETA avsn. 1.2.4: för axialkraftskapacitet räknas C30+ som C30 och
+# C24+ som C24 enligt EN 338. Samma likställande används här för
+# densiteten rho_k, som behövs för förbindarnas hålkantshållfasthet
+# enligt EN 1995-1-1 8.3.1. Värdena är EN 338:s karakteristiska
+# densiteter för motsvarande klass: C18 320, C24 350, C30 380 kg/m3.
+#
+# ETA avsn. 2.1 noterar att C24+ och C30+ kan ha något högre värden än
+# EN 338:s C24 och C30. Att räkna med EN 338-värdet är därmed den
+# konservativa och av ETA:n anvisade vägen.
+# ---------------------------------------------------------------------------
+
+# rho_mean behövs för förskjutningsmodulen K_ser (EN 1995-1-1 tab. 7.1),
+# som räknas på MEDELdensiteten. Värdena är EN 338:s rho_mean för
+# motsvarande klass: C18 380, C24 420, C30 460 kg/m3.
+
+# UTGÅVESTATUS: ETA 12/0018 av 2023-10-26 (RISE, dok. 1220846, grund
+# EAD 130367-00-0304) förutsätts gällande. Kontrollerat 2026-08-18: ingen
+# nyare utgåva hittad, MEN status är inte bekräftad av utfärdaren och
+# EOTA:s post för dokumentet ger 404. Se docs/ERRATA.md punkt 5b.
+#
+# ---------------------------------------------------------------------------
+# SS-EN 338:2016 tabell 1 — karakteristiska värden för konstruktionsvirke
+#
+# ETA 12/0018 avsn. 1.2.4 (Axial force resistance) hänvisar hit:
+#   "To be calculated according to EC5 using strength and stiffness values
+#    in EN 338. For C30+ use the values for C30 and for C24+ use the
+#    values for C24."
+# Därför ligger hela raden här, inte bara densiteten. Kopplingen görs med
+# nyckeln en338 i [flans.*] nedan.
+#
+# KÄLLOR (hämtade och korsprövade 2026-08-18, alla 27 värden identiska):
+#   - SIST EN 338:2016 tab. 1 (slovensk antagning, ordagrann) — enda
+#     lästa exemplaret av SJÄLVA standardtexten
+#   - TräGuiden, Svenskt Trä: "Konstruktionsvirke", anger SS-EN 338:2016
+#   - Svenskt Trä, "Dimensionering av träkonstruktioner del 2" 2016 tab 3.3
+#   - dataholz.eu datablad vh (saknar rho_mean)
+#
+# ATT VETA:
+#  - SS-EN 338:2016 har INTE lästs i svensk originalutgåva. EN-antagningar
+#    är tekniskt ordagranna, men verifiera gärna mot ditt eget exemplar.
+#  - E_0_05, E_0_mean, G_mean och densiteterna är OFÖRÄNDRADE mellan
+#    2003, 2009 och 2016. f_t_0_k, f_c_0_k och f_v_k ÄNDRADES 2016.
+#  - Kontrollera att en nedladdad PDF är utgåvan och inte utkastet
+#    prEN 338:2013: utkastet har f_t_0_k för C24 = 14,0, utgåvan 14,5.
+#  - f_v_k är lika för C24 och C30 (4,0). Det är riktigt, inte ett tryckfel.
+#  - f_v_k gäller virke UTAN sprickor. EC5 med svensk NA kräver k_cr = 0,67
+#    vid skjuvning av massivträ. Lättbalkens egen V_k kommer ur ETA:n och
+#    berörs inte.
+#  - Inre kontroll som stämmer: E_0_05 = 0,67*E_0_mean och
+#    G_mean = E_0_mean/16 (EN 384) inom 0,5 % för alla tre klasserna.
+# ---------------------------------------------------------------------------
+
+[en338.C18]
+f_m_k = 18.0
+f_t_0_k = 10.0
+f_c_0_k = 18.0
+f_v_k = 3.4
+E_0_mean = 9000.0
+E_0_05 = 6000.0
+G_mean = 560.0
+rho_k = 320.0
+rho_mean = 380.0
+
+[en338.C24]
+f_m_k = 24.0
+f_t_0_k = 14.5
+f_c_0_k = 21.0
+f_v_k = 4.0
+E_0_mean = 11000.0
+E_0_05 = 7400.0
+G_mean = 690.0
+rho_k = 350.0
+rho_mean = 420.0
+
+[en338.C30]
+f_m_k = 30.0
+f_t_0_k = 19.0
+f_c_0_k = 24.0
+f_v_k = 4.0
+E_0_mean = 12000.0
+E_0_05 = 8000.0
+G_mean = 750.0
+rho_k = 380.0
+rho_mean = 460.0
+
+[flans.C30plus]
+f_m_k = 27.0        # MPa
+E_f = 13000.0       # MPa, medelvärde
+rho_k = 380.0       # kg/m3, EN 338 för C30
+rho_mean = 460.0    # kg/m3, EN 338 för C30
+serier = ["H", "HI", "HM", "HB"]
+en338 = "C30"
+
+[flans.C24plus]
+f_m_k = 22.0
+E_f = 11000.0
+rho_k = 350.0       # kg/m3, EN 338 för C24
+rho_mean = 420.0
+serier = ["H", "HM", "HB"]
+en338 = "C24"
+
+[flans.C18]
+f_m_k = 13.7
+E_f = 9000.0
+rho_k = 320.0       # kg/m3, EN 338 för C18
+rho_mean = 380.0
+serier = ["HL"]
+en338 = "C18"
+
+# ---------------------------------------------------------------------------
+# TVÄRSNITTSGEOMETRI — ETA tab. 1 och tabellrubrikerna i tab. 11/12
+#
+# Måtten i tab. 11/12 skrivs "47x47 mm flanges" osv. Första talet är
+# flänsens HÖJD h_f, andra talet flänsens BREDD b_f. Det är verifierat mot
+# ETA:ns egen tröghetsradie i sidled: i_y = b_f/sqrt(12) ger 47/3,464 =
+# 13,6 mm mot tabellens 0,013 m, 60 -> 0,017, 70 -> 0,020, 97 -> 0,028.
+# Alla fyra serier stämmer.
+#
+# h_liv = h - 2*h_f    fri livhöjd mellan flänsarna
+# c_flans = h - h_f    c/c mellan flänsarnas tyngdpunkter (= handbokens
+#                      x-mått 253 mm för H300, se handboken s. 288)
+# ---------------------------------------------------------------------------
+
+[serie.H]
+h_flans = 47.0
+b_flans = 47.0
+t_liv = 10.0
+sidostod_max = 350.0        # mm, ETA tab. 19
+
+[serie.HM]
+h_flans = 47.0
+b_flans = 60.0
+t_liv = 10.0
+sidostod_max = 500.0
+
+[serie.HI]
+h_flans = 47.0
+b_flans = 70.0
+t_liv = 10.0
+sidostod_max = 600.0
+
+[serie.HB]
+h_flans = 47.0
+b_flans = 97.0
+t_liv = 10.0
+sidostod_max = 1000.0
+
+# ---------------------------------------------------------------------------
+# BALKAR MED OSB/3-LIV — ETA tab. 11, flänskvalitet C30+
+#
+# M_k   karakteristisk momentkapacitet [kNm]
+# EI    böjstyvhet [kNm2]
+# V_k   karakteristisk tvärkraftskapacitet [kN]
+# GA    skjuvstyvhet [kN]
+# i_x   tröghetsradie i balkens plan [m]
+# i_y   tröghetsradie i sidled [m]
+# N_ck  karakteristisk tryckkapacitet [kN]
+# N_tk  karakteristisk dragkapacitet [kN]
+#
+# M_k gäller ENDAST om tryckflänsen är sidostödd enligt sidostod_max ovan,
+# se ETA annex 3. Ingen vippningsberäkning ersätter det villkoret.
+# ---------------------------------------------------------------------------
+
+[balk.osb]
+H200 = { serie = "H", h = 200, M_k = 7.8,  EI = 342,  V_k = 13.8, GA = 1419, i_x = 0.076, i_y = 0.013, N_ck = 109.2, N_tk = 86.4 }
+H220 = { serie = "H", h = 220, M_k = 8.8,  EI = 435,  V_k = 15.1, GA = 1635, i_x = 0.085, i_y = 0.013, N_ck = 110.6, N_tk = 87.5 }
+H240 = { serie = "H", h = 240, M_k = 9.8,  EI = 540,  V_k = 16.5, GA = 1851, i_x = 0.094, i_y = 0.013, N_ck = 112.0, N_tk = 88.6 }
+H250 = { serie = "H", h = 250, M_k = 10.3, EI = 597,  V_k = 17.2, GA = 1959, i_x = 0.099, i_y = 0.013, N_ck = 112.7, N_tk = 89.2 }
+H300 = { serie = "H", h = 300, M_k = 12.7, EI = 929,  V_k = 20.5, GA = 2499, i_x = 0.122, i_y = 0.013, N_ck = 116.2, N_tk = 92.0 }
+H350 = { serie = "H", h = 350, M_k = 15.1, EI = 1339, V_k = 23.9, GA = 3039, i_x = 0.144, i_y = 0.013, N_ck = 119.7, N_tk = 94.8 }
+H400 = { serie = "H", h = 400, M_k = 17.7, EI = 1831, V_k = 27.3, GA = 3579, i_x = 0.166, i_y = 0.013, N_ck = 123.2, N_tk = 97.5 }
+H450 = { serie = "H", h = 450, M_k = 20.1, EI = 2405, V_k = 30.6, GA = 4119, i_x = 0.187, i_y = 0.012, N_ck = 126.7, N_tk = 100.3 }
+H500 = { serie = "H", h = 500, M_k = 22.2, EI = 3037, V_k = 34.0, GA = 4659, i_x = 0.208, i_y = 0.012, N_ck = 130.2, N_tk = 103.1 }
+
+HM200 = { serie = "HM", h = 200, M_k = 10.0, EI = 438,  V_k = 13.8, GA = 1419, i_x = 0.076, i_y = 0.017, N_ck = 138.5, N_tk = 109.6 }
+HM220 = { serie = "HM", h = 220, M_k = 11.3, EI = 557,  V_k = 15.1, GA = 1635, i_x = 0.086, i_y = 0.017, N_ck = 139.9, N_tk = 110.7 }
+HM240 = { serie = "HM", h = 240, M_k = 12.6, EI = 691,  V_k = 16.5, GA = 1851, i_x = 0.095, i_y = 0.017, N_ck = 141.3, N_tk = 111.9 }
+HM250 = { serie = "HM", h = 250, M_k = 13.2, EI = 764,  V_k = 17.2, GA = 1959, i_x = 0.100, i_y = 0.017, N_ck = 142.0, N_tk = 112.4 }
+HM300 = { serie = "HM", h = 300, M_k = 16.3, EI = 1186, V_k = 20.5, GA = 2499, i_x = 0.123, i_y = 0.017, N_ck = 145.5, N_tk = 115.2 }
+HM350 = { serie = "HM", h = 350, M_k = 19.3, EI = 1707, V_k = 23.9, GA = 3039, i_x = 0.145, i_y = 0.017, N_ck = 149.0, N_tk = 118.0 }
+HM400 = { serie = "HM", h = 400, M_k = 22.3, EI = 2329, V_k = 27.3, GA = 3579, i_x = 0.168, i_y = 0.016, N_ck = 152.5, N_tk = 120.7 }
+HM450 = { serie = "HM", h = 450, M_k = 25.3, EI = 3053, V_k = 30.6, GA = 4119, i_x = 0.190, i_y = 0.016, N_ck = 156.0, N_tk = 123.5 }
+HM500 = { serie = "HM", h = 500, M_k = 28.2, EI = 3884, V_k = 34.0, GA = 4659, i_x = 0.212, i_y = 0.016, N_ck = 159.5, N_tk = 126.3 }
+
+HI200 = { serie = "HI", h = 200, M_k = 11.8, EI = 512,  V_k = 13.8, GA = 1419, i_x = 0.077, i_y = 0.020, N_ck = 161.1, N_tk = 127.5 }
+HI220 = { serie = "HI", h = 220, M_k = 13.3, EI = 651,  V_k = 15.1, GA = 1635, i_x = 0.086, i_y = 0.020, N_ck = 162.5, N_tk = 128.6 }
+HI240 = { serie = "HI", h = 240, M_k = 14.8, EI = 807,  V_k = 16.5, GA = 1851, i_x = 0.095, i_y = 0.020, N_ck = 163.9, N_tk = 129.7 }
+HI250 = { serie = "HI", h = 250, M_k = 15.5, EI = 892,  V_k = 17.2, GA = 1959, i_x = 0.100, i_y = 0.020, N_ck = 164.6, N_tk = 130.3 }
+HI300 = { serie = "HI", h = 300, M_k = 19.2, EI = 1384, V_k = 20.5, GA = 2499, i_x = 0.123, i_y = 0.020, N_ck = 168.1, N_tk = 133.1 }
+HI350 = { serie = "HI", h = 350, M_k = 22.7, EI = 1990, V_k = 23.9, GA = 3039, i_x = 0.146, i_y = 0.019, N_ck = 171.6, N_tk = 135.8 }
+HI400 = { serie = "HI", h = 400, M_k = 26.2, EI = 2711, V_k = 27.3, GA = 3579, i_x = 0.169, i_y = 0.019, N_ck = 175.1, N_tk = 138.6 }
+HI450 = { serie = "HI", h = 450, M_k = 29.6, EI = 3552, V_k = 30.6, GA = 4119, i_x = 0.192, i_y = 0.019, N_ck = 178.6, N_tk = 141.4 }
+HI500 = { serie = "HI", h = 500, M_k = 33.0, EI = 4513, V_k = 34.0, GA = 4659, i_x = 0.214, i_y = 0.019, N_ck = 182.1, N_tk = 144.2 }
+
+# OBS N_tk för HB med OSB-liv: se [errata.eta_tab11_hb_ntk] längst ned.
+# ETA tab. 11 upprepar M_k-kolumnen i N_tk-kolumnen för hela HB-serien.
+# Värdena är satta till -1 = SAKNAS och får inte användas.
+HB200 = { serie = "HB", h = 200, M_k = 16.3, EI = 711,  V_k = 13.8, GA = 1419, i_x = 0.077, i_y = 0.028, N_ck = 222.0, N_tk = -1 }
+HB220 = { serie = "HB", h = 220, M_k = 18.4, EI = 904,  V_k = 15.1, GA = 1635, i_x = 0.086, i_y = 0.028, N_ck = 223.4, N_tk = -1 }
+HB240 = { serie = "HB", h = 240, M_k = 20.5, EI = 1121, V_k = 16.5, GA = 1851, i_x = 0.096, i_y = 0.028, N_ck = 224.8, N_tk = -1 }
+HB250 = { serie = "HB", h = 250, M_k = 21.5, EI = 1238, V_k = 17.2, GA = 1959, i_x = 0.101, i_y = 0.028, N_ck = 225.5, N_tk = -1 }
+HB300 = { serie = "HB", h = 300, M_k = 26.6, EI = 1918, V_k = 20.5, GA = 2499, i_x = 0.124, i_y = 0.027, N_ck = 229.0, N_tk = -1 }
+HB350 = { serie = "HB", h = 350, M_k = 31.4, EI = 2753, V_k = 23.9, GA = 3039, i_x = 0.148, i_y = 0.027, N_ck = 232.5, N_tk = -1 }
+HB400 = { serie = "HB", h = 400, M_k = 36.2, EI = 3745, V_k = 27.3, GA = 3579, i_x = 0.171, i_y = 0.027, N_ck = 236.0, N_tk = -1 }
+HB450 = { serie = "HB", h = 450, M_k = 40.9, EI = 4898, V_k = 30.6, GA = 4119, i_x = 0.194, i_y = 0.027, N_ck = 239.5, N_tk = -1 }
+HB500 = { serie = "HB", h = 500, M_k = 45.4, EI = 6212, V_k = 34.0, GA = 4659, i_x = 0.217, i_y = 0.027, N_ck = 243.0, N_tk = -1 }
+
+# ---------------------------------------------------------------------------
+# BALKAR MED SPÅNSKIVELIV P5 — ETA tab. 12, flänskvalitet C30+
+#
+# Beteckningen har suffix "s". Notera att spånskiveliv ger HÖGRE
+# tvärkraftskapacitet än OSB (ETA ekv. 7 mot ekv. 6) men LÄGRE k_mod för
+# tvärkraft och betydligt högre k_def, se [kmod] och [kdef] nedan.
+# ---------------------------------------------------------------------------
+
+[balk.spanskiva]
+H200s = { serie = "H", h = 200, M_k = 7.8,  EI = 340,  V_k = 16.6, GA = 1261, i_x = 0.077, i_y = 0.014, N_ck = 106.1, N_tk = 84.0 }
+H220s = { serie = "H", h = 220, M_k = 8.8,  EI = 432,  V_k = 17.9, GA = 1453, i_x = 0.086, i_y = 0.014, N_ck = 107.1, N_tk = 84.8 }
+H240s = { serie = "H", h = 240, M_k = 9.8,  EI = 535,  V_k = 19.2, GA = 1645, i_x = 0.096, i_y = 0.013, N_ck = 108.0, N_tk = 85.5 }
+H250s = { serie = "H", h = 250, M_k = 10.3, EI = 591,  V_k = 19.9, GA = 1741, i_x = 0.100, i_y = 0.013, N_ck = 108.5, N_tk = 85.9 }
+H300s = { serie = "H", h = 300, M_k = 12.7, EI = 916,  V_k = 23.1, GA = 2221, i_x = 0.124, i_y = 0.013, N_ck = 110.8, N_tk = 87.7 }
+H350s = { serie = "H", h = 350, M_k = 15.0, EI = 1316, V_k = 26.3, GA = 2701, i_x = 0.147, i_y = 0.013, N_ck = 113.2, N_tk = 89.6 }
+H400s = { serie = "H", h = 400, M_k = 17.3, EI = 1793, V_k = 29.6, GA = 3181, i_x = 0.169, i_y = 0.013, N_ck = 115.5, N_tk = 91.5 }
+H450s = { serie = "H", h = 450, M_k = 19.6, EI = 2348, V_k = 32.8, GA = 3661, i_x = 0.192, i_y = 0.013, N_ck = 117.9, N_tk = 93.3 }
+H500s = { serie = "H", h = 500, M_k = 21.8, EI = 2982, V_k = 36.1, GA = 4141, i_x = 0.214, i_y = 0.013, N_ck = 120.3, N_tk = 95.2 }
+
+HM200s = { serie = "HM", h = 200, M_k = 10.0, EI = 436,  V_k = 16.6, GA = 1261, i_x = 0.077, i_y = 0.017, N_ck = 135.5, N_tk = 107.2 }
+HM220s = { serie = "HM", h = 220, M_k = 11.3, EI = 553,  V_k = 17.9, GA = 1453, i_x = 0.087, i_y = 0.017, N_ck = 136.4, N_tk = 108.0 }
+HM240s = { serie = "HM", h = 240, M_k = 12.6, EI = 686,  V_k = 19.2, GA = 1645, i_x = 0.096, i_y = 0.017, N_ck = 137.3, N_tk = 108.7 }
+HM250s = { serie = "HM", h = 250, M_k = 13.2, EI = 758,  V_k = 19.9, GA = 1741, i_x = 0.101, i_y = 0.017, N_ck = 137.8, N_tk = 109.1 }
+HM300s = { serie = "HM", h = 300, M_k = 16.2, EI = 1173, V_k = 23.1, GA = 2221, i_x = 0.124, i_y = 0.017, N_ck = 140.2, N_tk = 111.0 }
+HM350s = { serie = "HM", h = 350, M_k = 19.2, EI = 1684, V_k = 26.3, GA = 2701, i_x = 0.148, i_y = 0.017, N_ck = 142.5, N_tk = 112.8 }
+HM400s = { serie = "HM", h = 400, M_k = 22.1, EI = 2291, V_k = 29.6, GA = 3181, i_x = 0.171, i_y = 0.017, N_ck = 144.9, N_tk = 114.7 }
+HM450s = { serie = "HM", h = 450, M_k = 25.0, EI = 2996, V_k = 32.8, GA = 3661, i_x = 0.194, i_y = 0.017, N_ck = 147.2, N_tk = 116.6 }
+HM500s = { serie = "HM", h = 500, M_k = 27.8, EI = 3800, V_k = 36.1, GA = 4141, i_x = 0.217, i_y = 0.016, N_ck = 149.6, N_tk = 118.4 }
+
+HI200s = { serie = "HI", h = 200, M_k = 11.7, EI = 509,  V_k = 16.6, GA = 1261, i_x = 0.077, i_y = 0.020, N_ck = 158.0, N_tk = 125.1 }
+HI220s = { serie = "HI", h = 220, M_k = 13.2, EI = 647,  V_k = 17.9, GA = 1453, i_x = 0.087, i_y = 0.020, N_ck = 159.0, N_tk = 125.8 }
+HI240s = { serie = "HI", h = 240, M_k = 14.7, EI = 802,  V_k = 19.2, GA = 1645, i_x = 0.096, i_y = 0.020, N_ck = 159.9, N_tk = 126.6 }
+HI250s = { serie = "HI", h = 250, M_k = 15.4, EI = 886,  V_k = 19.9, GA = 1741, i_x = 0.101, i_y = 0.020, N_ck = 160.4, N_tk = 127.0 }
+HI300s = { serie = "HI", h = 300, M_k = 19.0, EI = 1371, V_k = 23.1, GA = 2221, i_x = 0.125, i_y = 0.020, N_ck = 162.7, N_tk = 128.8 }
+HI350s = { serie = "HI", h = 350, M_k = 22.5, EI = 1966, V_k = 26.3, GA = 2701, i_x = 0.148, i_y = 0.020, N_ck = 165.1, N_tk = 130.7 }
+HI400s = { serie = "HI", h = 400, M_k = 25.8, EI = 2673, V_k = 29.6, GA = 3181, i_x = 0.172, i_y = 0.020, N_ck = 167.4, N_tk = 132.6 }
+HI450s = { serie = "HI", h = 450, M_k = 29.1, EI = 3494, V_k = 32.8, GA = 3661, i_x = 0.195, i_y = 0.019, N_ck = 169.8, N_tk = 134.4 }
+HI500s = { serie = "HI", h = 500, M_k = 32.1, EI = 4429, V_k = 36.1, GA = 4141, i_x = 0.218, i_y = 0.019, N_ck = 172.1, N_tk = 136.3 }
+
+HB200s = { serie = "HB", h = 200, M_k = 16.3, EI = 708,  V_k = 16.6, GA = 1261, i_x = 0.077, i_y = 0.028, N_ck = 218.9, N_tk = 173.3 }
+HB220s = { serie = "HB", h = 220, M_k = 18.4, EI = 900,  V_k = 17.9, GA = 1453, i_x = 0.087, i_y = 0.028, N_ck = 219.9, N_tk = 174.1 }
+HB240s = { serie = "HB", h = 240, M_k = 20.4, EI = 1115, V_k = 19.2, GA = 1645, i_x = 0.097, i_y = 0.028, N_ck = 220.8, N_tk = 174.8 }
+HB250s = { serie = "HB", h = 250, M_k = 21.4, EI = 1232, V_k = 19.9, GA = 1741, i_x = 0.101, i_y = 0.028, N_ck = 221.3, N_tk = 175.2 }
+HB300s = { serie = "HB", h = 300, M_k = 26.4, EI = 1905, V_k = 23.1, GA = 2221, i_x = 0.125, i_y = 0.028, N_ck = 223.6, N_tk = 177.0 }
+HB350s = { serie = "HB", h = 350, M_k = 31.2, EI = 2730, V_k = 26.3, GA = 2701, i_x = 0.149, i_y = 0.028, N_ck = 226.0, N_tk = 178.9 }
+HB400s = { serie = "HB", h = 400, M_k = 35.8, EI = 3707, V_k = 29.6, GA = 3181, i_x = 0.172, i_y = 0.027, N_ck = 228.3, N_tk = 180.8 }
+HB450s = { serie = "HB", h = 450, M_k = 40.4, EI = 4840, V_k = 32.8, GA = 3661, i_x = 0.197, i_y = 0.027, N_ck = 230.7, N_tk = 182.6 }
+HB500s = { serie = "HB", h = 500, M_k = 44.8, EI = 6128, V_k = 36.1, GA = 4141, i_x = 0.220, i_y = 0.027, N_ck = 233.1, N_tk = 184.5 }
+
+# ---------------------------------------------------------------------------
+# k_mod FÖR BALKEN — ETA tab. 17
+#
+# Dessa värden gäller balken som produkt och ersätter EN 1995-1-1 tab. 3.1
+# för lättbalken. Notera att tvärkraft har EGNA, LÄGRE värden som beror på
+# livmaterialet — det är inte samma k_mod som för böjning.
+#
+# Fotnot till ETA tab. 17: tvärkraftskolumnen gäller även upplagskapacitet
+# enligt figur 2 MED punktlast ovanifrån UTAN förstärkning, för h >= 250 vid
+# ändupplag och h >= 300 vid innerupplag/mittstöd.
+# ---------------------------------------------------------------------------
+
+[kmod.bojning_upplag_axial]
+kk1 = { permanent = 0.60, lang = 0.70, medel = 0.80, kort = 0.90, momentan = 1.10 }
+kk2 = { permanent = 0.60, lang = 0.70, medel = 0.80, kort = 0.90, momentan = 1.10 }
+
+[kmod.tvarkraft]
+osb_p7_kk1 = { permanent = 0.40, lang = 0.50, medel = 0.70, kort = 0.90, momentan = 1.10 }
+p5_kk1     = { permanent = 0.30, lang = 0.45, medel = 0.65, kort = 0.85, momentan = 1.10 }
+osb_p7_kk2 = { permanent = 0.30, lang = 0.40, medel = 0.55, kort = 0.70, momentan = 0.90 }
+p5_kk2     = { permanent = 0.20, lang = 0.30, medel = 0.45, kort = 0.60, momentan = 0.80 }
+
+# ---------------------------------------------------------------------------
+# k_def FÖR BALKEN — ETA tab. 18
+#
+# Skjuvdeformationen kryper VÄSENTLIGT mer än böjdeformationen, och P5-liv
+# mer än OSB. Nedböjning i bruksgränstillstånd måste därför delas upp i en
+# böjdel och en skjuvdel med olika k_def — man kan inte använda ett enda
+# k_def för hela nedböjningen.
+# ---------------------------------------------------------------------------
+
+[kdef.bojning_axial]
+kk1 = 0.60
+kk2 = 0.80
+
+[kdef.skjuvning]
+osb_p7_kk1 = 1.50
+p5_kk1     = 2.25
+osb_p7_kk2 = 2.25
+p5_kk2     = 3.00
+
+# ---------------------------------------------------------------------------
+# UPPLAGSKAPACITET — ETA avsn. 1.2.3, tab. 6-9
+#
+# Utan förstärkning, MED punktlast över upplag  (ekv. 3):
+#     F_k = (L1/45)^0.5 * a * k_A * k_6
+# Med förstärkning, UTAN punktlast över upplag  (ekv. 4):
+#     F_k = (L1/45)^0.5 * a * k_B * k_7
+#
+# a för ändupplag = a_and_bas + delta_a, där (ekv. 5)
+#     delta_a = 4 * y / (h/2)      y = utstick utanför upplaget
+#
+# Effektiv upplagslängd: ändupplag L1 = min(L1, 150), mitt-/innerupplag
+# L1 = min(L1, 200). För h <= 220 räknas upplagskapaciteten med L1 = 150.
+# Om L2 < L1 ska L2 användas som upplagslängd. Vid ändupplag där y > h ska
+# kapaciteten räknas som mittstöd.
+#
+# ETA fotnot: resultatet måste alltid kontrolleras mot balkens
+# tvärkraftskapacitet nära upplaget — F_d <= V_d vid ändupplag,
+# F_d <= 2*V_d vid mittstöd.
+#
+# Minsta tillåtna upplagslängd är 45 mm (ETA annex 3).
+# ---------------------------------------------------------------------------
+
+[upplag.a]
+# ETA tab. 6
+H  = { and_bas = 9.0,  mitt = 14.0 }
+HL = { and_bas = 8.5,  mitt = 13.0 }
+HM = { and_bas = 9.5,  mitt = 15.0 }
+HI = { and_bas = 10.5, mitt = 17.0 }
+HB = { and_bas = 12.0, mitt = 21.0 }
+
+[upplag.k_A]
+# ETA tab. 7. Gäller UTAN förstärkning MED punktlast över upplag.
+# Utan punktlast över upplag är k_A = 1,0.
+# Mellanliggande L1 interpoleras.
+L1_and = [45, 70, 100, 150]
+L1_mitt = [70, 100, 150]
+h_rader = [250, 300, 350, 400, 450, 500]
+and_upplag = [
+  [1.00, 1.00, 1.00, 1.00],   # 250
+  [1.00, 0.99, 0.98, 0.95],   # 300
+  [1.00, 0.98, 0.95, 0.90],   # 350
+  [1.00, 0.96, 0.92, 0.85],   # 400
+  [0.98, 0.94, 0.89, 0.80],   # 450
+  [0.97, 0.92, 0.85, 0.75],   # 500
+]
+mitt_upplag = [
+  [1.00, 1.00, 1.00],         # 250
+  [1.00, 1.00, 1.00],         # 300
+  [0.98, 0.92, 0.92],         # 350
+  [0.96, 0.88, 0.88],         # 400
+  [0.95, 0.84, 0.84],         # 450
+  [0.93, 0.80, 0.80],         # 500
+]
+
+[upplag.k_B]
+# ETA tab. 8. Gäller MED förstärkning UTAN punktlast över upplag.
+# Med punktlast över upplag är k_B = 1,0 för alla höjder och kvaliteter.
+# För L1 > 150 mm sätts L1 = 150 mm.
+L1_and = [45, 70, 100, 150]
+L1_mitt = [70, 100, 150]
+h_rader = [200, 220, 240, 250, 300, 350, 400, 450, 500]
+and_upplag = [
+  [1.30, 1.23, 1.14, 1.00],   # 200
+  [1.32, 1.24, 1.16, 1.01],   # 220
+  [1.33, 1.26, 1.17, 1.02],   # 240
+  [1.34, 1.27, 1.18, 1.03],   # 250
+  [1.39, 1.31, 1.22, 1.06],   # 300
+  [1.43, 1.35, 1.26, 1.10],   # 350
+  [1.47, 1.39, 1.29, 1.13],   # 400
+  [1.52, 1.43, 1.33, 1.16],   # 450
+  [1.56, 1.47, 1.37, 1.20],   # 500
+]
+mitt_upplag = [
+  [1.25, 1.19, 1.09],         # 200
+  [1.27, 1.21, 1.10],         # 220
+  [1.28, 1.22, 1.12],         # 240
+  [1.29, 1.23, 1.13],         # 250
+  [1.33, 1.27, 1.16],         # 300
+  [1.38, 1.31, 1.20],         # 350
+  [1.42, 1.35, 1.24],         # 400
+  [1.46, 1.39, 1.27],         # 450
+  [1.50, 1.43, 1.31],         # 500
+]
+
+[upplag.k_6_k_7]
+# ETA tab. 9. k_6 används vid ändupplag för alla balktyper. Vid mittstöd och
+# vid ändupplag MED förstärkning är k_6 = 1,0. k_7 används för förstärkta
+# HB-balkar utan punktlast över upplag, annars k_7 = 1,0.
+h_rader = [400, 450, 500]
+k_6 = [1.00, 0.96, 0.84]
+k_7 = [1.03, 1.10, 1.17]
+k_6_under_400 = 1.00
+k_7_under_400 = 1.00
+
+# ---------------------------------------------------------------------------
+# LIVFÖRSTÄRKNING VID UPPLAG — ETA avsn. 1.2.3, figur 3
+#
+# Förstärkning monteras på BÅDA sidor av livet. Bredden ska vara minst halva
+# balkhöjden (h/2) och höjden 2 mm mindre än fria livhöjden.
+# ETA: "The prevailing conditions may require reinforcements with width
+# larger than h/2, this is to be assessed by the structural designer."
+# ---------------------------------------------------------------------------
+
+[forstarkning]
+bredd_min_faktor = 0.5      # * h
+spel_mot_flans = 2.0        # mm
+
+# ---------------------------------------------------------------------------
+# VAD SOM INTE FINNS I ETA:N
+# ---------------------------------------------------------------------------
+
+[saknas]
+# Axialstyvhet EA deklareras inte. ETA:n ger N_ck/N_tk (kapacitet) och EI/GA
+# (styvhet) men inte EA. För ramanalysen måste EA HÄRLEDAS ur
+# EA = E_f*A_f + E_liv*A_liv med E_f ur [flans] och E_liv ur skivbibliotekets
+# EN 12369-värde för livmaterialet. Det är en härledning, inte en deklarerad
+# egenskap, och ska redovisas som ett antagande.
+EA = "HÄRLETT — se kommentar"
+
+# HL-serien och pelartyp R finns i ETA tab. 15/16 men är inte inlagda här.
+# HL har C18-flänsar, R är pelare. Ingen av dem behövs för en takstol.
+serier_ej_inlagda = ["HL", "R"]
+
+# ---------------------------------------------------------------------------
+# ERRATA I ETA 12/0018
+# ---------------------------------------------------------------------------
+
+[errata.eta_tab11_hb_ntk]
+var = "ETA 12/0018, tab. 11, kolumn N_tk för HB-serien (s. 16 av 22)"
+tryckt = "16.3, 18.4, 20.5, 21.5, 26.6, 31.4, 36.2, 40.9, 45.4"
+problem = """
+Kolumnen N_tk är för HB-serien identisk med kolumnen M_k, rad för rad, i
+alla nio rader. Det kan inte vara riktigt: en dragkapacitet i kN kan inte
+sammanfalla numeriskt med en momentkapacitet i kNm för varje balkhöjd.
+För H-, HM- och HI-serierna gäller genomgående N_tk ~ 0,79 * N_ck. För HB
+skulle det ge ca 175 kN vid HB200, inte 16,3 kN.
+
+Att det är en kopieringsmiss bekräftas av tab. 12: HB-serien med
+spånskiveliv har där N_tk = 173,3 till 184,5 kN, vilket ligger på just den
+nivå som N_ck-kolumnen förutsäger. Det är alltså tab. 11 som är fel, inte
+tab. 12.
+"""
+konsekvens = """
+Dragkapaciteten för HB-balkar med OSB-liv är okänd i den här utgåvan av
+ETA:n. Värdena är satta till -1 i [balk.osb] och programmet ska vägra
+utnyttja HB med OSB-liv i drag tills värdet är bekräftat av Masonite Beams
+eller RISE. Tryckkapaciteten N_ck är opåverkad och kan användas.
+Spånskivevarianten HB...s är opåverkad.
+"""
+
+[errata.handboken_eta_nummer]
+var = "The I-joist Handbook 2022, s. 36 mot s. 42-43"
+problem = """
+s. 36 visar "ETA 08/0012" intill EU-symbolen medan s. 42 och s. 43 hänvisar
+till "Masonite Beams ETA 12/0018" för hållfasthet, styvhet, upplagskapacitet
+och hålregler. Det är 12/0018 som är gällande ETA för produkten.
+"""
+konsekvens = "Ingen, så länge man använder 12/0018. Nämns för spårbarhet."

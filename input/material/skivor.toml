@@ -1,0 +1,206 @@
+# ---------------------------------------------------------------------------
+# SKIVMATERIAL — karakteristiska värden för bärande skivor
+#
+# VARFÖR INTE ETA: skivmaterial har inga ETA:er. De omfattas av den
+# harmoniserade EN 13986 och deklareras i tillverkarens DoP. Karakteristiska
+# värden för dimensionering hämtas ur EN 12369-1 (OSB, spånskiva, fiberskiva)
+# respektive EN 12369-2 (plywood). Masonite Beams ETA 12/0018 säger själv i
+# avsnitt 2.1: "Characteristic values for structural design according to
+# EN 12369."
+#
+# Värdena nedan är EN 12369-1:s tabellvärden. De är avsedda som utgångsläge.
+# KONTROLLERA MOT DoP för den skiva du faktiskt köper innan skarp
+# dimensionering — särskilt för plywood, se [skiva.plywood_handbok].
+#
+# KÄLLOR för de avlästa talen:
+#   OSB/3     MEDITE SMARTPLY OSB3 Technical Data Sheet, tab. 2
+#             "Characteristic values ... Taken from BS EN 12369-1"
+#   P5        UNILIN "Construction manual — Structural particle board (P5)",
+#             s. 3, tab. 2 "Mechanical properties (EN 12369-1)"
+#   Plywood   The I-joist Handbook 2022, exempel 5.3.4.1 (s. 286)
+# ---------------------------------------------------------------------------
+
+[metadata]
+avlast_av_claude = "2026-08-17"
+kmod_kalla = "EN 1995-1-1 tab. 3.1"
+kdef_kalla = "EN 1995-1-1 tab. 3.2"
+gamma_M_kalla = "EN 1995-1-1 tab. 2.3 med EKS nationella val"
+
+# ---------------------------------------------------------------------------
+# OSB/3 — EN 300, karakteristiska värden EN 12369-1
+#
+# Anisotrop: 0 = huvudriktningen (major axis, längs skivan), 90 = tvärs.
+# Handboken s. 290 tillåter uttryckligen OSB i stället för plywood i
+# nockförbandet: "web reinforcement and the surface-mounted board do not
+# necessarily have to be plywood but can, for example, be an OSB board."
+# ---------------------------------------------------------------------------
+
+[skiva.osb3]
+namn = "OSB/3"
+produktstandard = "EN 300"
+kalla_varden = "EN 12369-1"
+anisotrop = true
+klimatklasser = [1, 2]
+femprocentil_styvhet = 0.85      # 5-percentil = 0.85 * medelvärde
+tjocklek_min = [6, 10, 18]       # intervallen är >min till max
+tjocklek_max = [10, 18, 25]
+
+[skiva.osb3.hallfasthet]
+# MPa, ett värde per tjockleksintervall ovan
+f_m_0 = [18.0, 16.4, 14.8]       # böjning i skivans plan-normal, huvudriktning
+f_m_90 = [9.0, 8.2, 7.4]
+f_t_0 = [9.9, 9.4, 9.0]          # drag I SKIVANS PLAN
+f_t_90 = [7.2, 7.0, 6.8]
+f_c_0 = [15.9, 15.4, 14.8]       # tryck I SKIVANS PLAN
+f_c_90 = [12.9, 12.7, 12.4]
+f_v = [6.8, 6.8, 6.8]            # skivskjuvning i planet (racking)
+f_r = [1.0, 1.0, 1.0]            # rullskjuvning (planar)
+
+[skiva.osb3.styvhet]
+# MPa, MEDELVÄRDEN
+E_m_0 = [4930, 4930, 4930]
+E_m_90 = [1980, 1980, 1980]
+E_ct_0 = [3800, 3800, 3800]      # drag och tryck i planet, huvudriktning
+E_ct_90 = [3000, 3000, 3000]
+G_v = [1080, 1080, 1080]
+G_r = [50, 50, 50]
+
+# ---------------------------------------------------------------------------
+# SPÅNSKIVA P5 — EN 312, karakteristiska värden EN 12369-1
+#
+# Spånskiva är isotrop i skivans plan, därför inga 0/90-riktningar.
+# Notera att 5-percentilfaktorn är 0.80 för spånskiva mot 0.85 för OSB.
+# ---------------------------------------------------------------------------
+
+[skiva.p5]
+namn = "Spånskiva P5"
+produktstandard = "EN 312"
+kalla_varden = "EN 12369-1"
+anisotrop = false
+klimatklasser = [1, 2]
+femprocentil_styvhet = 0.80
+tjocklek_min = [6, 10, 18, 25]
+tjocklek_max = [10, 18, 25, 40]  # sista intervallet är ">25" i EN 12369-1
+
+[skiva.p5.hallfasthet]
+f_m = [15.0, 13.3, 11.7, 10.0]
+f_t = [9.4, 8.5, 7.4, 6.6]
+f_c = [12.7, 11.8, 10.3, 9.8]
+f_v = [7.0, 6.5, 5.9, 5.2]
+f_r = [1.9, 1.7, 1.5, 1.3]
+
+[skiva.p5.styvhet]
+E_m = [3500, 3300, 3000, 2600]
+G_v = [960, 930, 860, 750]
+
+# ---------------------------------------------------------------------------
+# PLYWOOD — handbokens exempelvärden
+#
+# EN 12369-2 ger INTE generiska värden per plywoodklass på samma sätt som
+# EN 12369-1 gör för OSB och spånskiva. Plywoods egenskaper beror på
+# uppbyggnaden: antal skikt, skiktriktningar och träslag. Karakteristiska
+# värden måste därför hämtas ur den specifika skivans DoP.
+#
+# Värdena nedan är de handboken själv räknar med i exempel 5.3.4.1 och som
+# projektets testfall är låsta mot. De duger för att reproducera handboken.
+# De duger INTE som generella plywoodvärden.
+# ---------------------------------------------------------------------------
+
+[skiva.plywood_handbok]
+namn = "Plywood P30 18 mm (handbokens exempel)"
+produktstandard = "EN 636"
+# f_m ur exempel 5.3.4.1 (s. 286), f_t_90 och f_v ur exempel 5.3.4.2
+# (s. 291). Skivan ar konstruktionsplywood P30 -- det star pa handbokens
+# egen detaljritning s. 112 ("PLYWOODSKIVA, TAK P30").
+kalla_varden = "The I-joist Handbook 2022, ex. 5.3.4.1 s. 286 + 5.3.4.2 s. 291"
+kontrollera_mot_dop = true
+anisotrop = true
+klimatklasser = [1, 2]
+# tjocklek_min == tjocklek_max betyder EN ENDA tjocklek, inte ett intervall.
+# Uppslagning på någon annan tjocklek ska faila i stället för att tyst ge
+# 18 mm-värdena, eftersom de inte går att extrapolera för plywood.
+tjocklek_min = [18]
+tjocklek_max = [18]
+
+[skiva.plywood_handbok.hallfasthet]
+f_m_0 = [22.5]
+f_t_90 = [7.0]
+f_v = [3.0]
+rho_k = 410.0                    # kg/m3
+
+# ---------------------------------------------------------------------------
+# k_mod FÖR SKIVMATERIAL — EN 1995-1-1 tab. 3.1
+#
+# KORSVERIFIERING: Masonite Beams ETA 12/0018 tab. 17 anger k_mod för
+# balkens TVÄRKRAFT, som bärs av livet. De värdena är identiska med
+# raderna nedan för OSB/3 respektive P5 i motsvarande klimatklass — ETA:n
+# hämtar dem alltså rakt ur EC5 tab. 3.1 för livmaterialet. Det gör att de
+# två dokumenten bekräftar varandra. Testet
+# tests/test_en12369_skivor.py::test_kmod_stammer_med_eta_tabell_17
+# låser fast överensstämmelsen.
+#
+# Plywoodraden bekräftas av handboken, som räknar med k_mod = 0.8 för
+# medellång last i exempel 5.3.4.1.
+# ---------------------------------------------------------------------------
+
+[kmod.osb3]
+kk1 = { permanent = 0.40, lang = 0.50, medel = 0.70, kort = 0.90, momentan = 1.10 }
+kk2 = { permanent = 0.30, lang = 0.40, medel = 0.55, kort = 0.70, momentan = 0.90 }
+
+[kmod.p5]
+kk1 = { permanent = 0.30, lang = 0.45, medel = 0.65, kort = 0.85, momentan = 1.10 }
+kk2 = { permanent = 0.20, lang = 0.30, medel = 0.45, kort = 0.60, momentan = 0.80 }
+
+[kmod.plywood_handbok]
+kk1 = { permanent = 0.60, lang = 0.70, medel = 0.80, kort = 0.90, momentan = 1.10 }
+kk2 = { permanent = 0.60, lang = 0.70, medel = 0.80, kort = 0.90, momentan = 1.10 }
+
+# ---------------------------------------------------------------------------
+# k_def FÖR SKIVMATERIAL — EN 1995-1-1 tab. 3.2
+#
+# Samma korsverifiering: ETA 12/0018 tab. 18 anger k_def för balkens
+# SKJUVDEFORMATION till 1.50 för OSB i klimatklass 1, 2.25 för P5 i
+# klimatklass 1, 2.25 respektive 3.00 i klimatklass 2 — identiskt med nedan.
+# ---------------------------------------------------------------------------
+
+[kdef]
+osb3 = { kk1 = 1.50, kk2 = 2.25 }
+p5 = { kk1 = 2.25, kk2 = 3.00 }
+plywood_handbok = { kk1 = 0.80, kk2 = 1.00 }
+
+# ---------------------------------------------------------------------------
+# PARTIALKOEFFICIENTER — EN 1995-1-1 tab. 2.3
+# ---------------------------------------------------------------------------
+
+[gamma_M]
+osb3 = 1.20
+p5 = 1.20
+plywood_handbok = 1.20
+
+# ---------------------------------------------------------------------------
+# METODVAL: VILKEN HÅLLFASTHET GÄLLER FÖR SKIVAN I NOCKFÖRBANDET?
+#
+# Handboken räknar skivans momentkapacitet som
+#     M_PL = W * f_m,k        med W = n * t * h^2 / 6
+# Det är böjning av skivan I SITT EGET PLAN — skivan verkar som en hög,
+# tunn balk över foget. Men f_m i EN 12369 är böjhållfasthet vinkelrätt
+# skivans plan (plattböjning), uppmätt enligt EN 310 på en skiva som böjs
+# som ett bord. Det är inte samma spänningstillstånd.
+#
+# För böjning i planet är det drag- och tryckhållfastheten i planet,
+# f_t_0 och f_c_0, som är de försvarbara parametrarna. Skillnaden är stor:
+# för 18 mm OSB/3 är f_m_0 = 16.4 MPa men f_t_0 = 9.4 MPa.
+#
+# Programmet redovisar därför BÅDA:
+#   handbok  M_PL = W * f_m      spårbart mot handbokens exempel
+#   i_planet M_PL = W * f_t_0    dimensionerande
+#
+# Notera också att OSB/3 har f_v = 6.8 MPa mot handbokens plywoodvärde
+# 3.0 MPa. I skjuvkontrollen av skivan längs flänsen är OSB alltså mer än
+# dubbelt så stark som den plywood handboken räknar med. Materialvalet
+# slår olika i de två kontrollerna, och det är just därför båda ska visas.
+# ---------------------------------------------------------------------------
+
+[metod]
+skivbojning_dimensionerande = "i_planet"
+skivbojning_redovisa_bada = true

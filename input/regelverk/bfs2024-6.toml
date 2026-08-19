@@ -1,0 +1,153 @@
+# ---------------------------------------------------------------------------
+# BFS 2024:6 — Boverkets föreskrifter och allmänna råd om bärförmåga,
+# stadga och beständighet i byggnader m.m.
+#
+# "Genom författningen upphävs Boverkets föreskrifter och allmänna råd
+#  (2011:10) om tillämpning av europeiska konstruktionsstandarder
+#  (eurokoder)."
+#
+# EKS (BFS 2011:10 med ändringar) är alltså UPPHÄVT. Övergångstiden gick
+# ut 2026-06-30; sedan 2026-07-01 gäller BFS 2024:6 ensamt.
+#
+# Författningstext är undantagen från upphovsrätt enligt 9 § första
+# stycket upphovsrättslagen (1960:729), så tabellerna får återges här.
+# KARTORNA (figur 4:2 snölast, figur 4:3 referensvindhastighet) får
+# däremot INTE återges — 9 § andra stycket punkt 1 undantar uttryckligen
+# kartor. De hämtas per koordinat ur Boverkets öppna API i stället.
+#
+# Avläst ur författningens PDF 2026-08-18, sid- och tabellnummer nedan.
+# ---------------------------------------------------------------------------
+
+[metadata]
+forfattning = "BFS 2024:6"
+utgivare = "Boverket"
+ersatter = "BFS 2011:10 (EKS) med ändringar"
+avlast = "2026-08-18"
+
+# 2 kap. 2 §
+[sakerhetsklass]
+1 = 0.83
+2 = 0.91
+3 = 1.00
+
+# ---------------------------------------------------------------------------
+# Tabell 3:1 — Lastkombinationer i brottgränstillstånd (3 kap. 6 §)
+#
+# OBS: BFS 2024:6 har BARA TVÅ brottgränskombinationer, och den andra
+# saknar variabel last helt. Det är alltså inte EN 1990:s 6.10a/6.10b.
+#   LK1  γd*1,2*Gk  + γd*1,5*Qk (huvudlast) + γd*1,5*Ψ0*Qk (övriga)
+#   LK2  γd*1,35*Gk                            (ingen variabel last)
+# Gynnsam permanent last är Gk i båda — UTAN γd.
+# ---------------------------------------------------------------------------
+
+[lastkombination.LK1]
+namn = "Lastkombination 1 (variabel huvudlast)"
+gamma_G_ogynnsam = 1.20
+gamma_G_gynnsam = 1.00
+gamma_Q = 1.50
+har_variabel_last = true
+
+[lastkombination.LK2]
+namn = "Lastkombination 2 (endast permanent last)"
+gamma_G_ogynnsam = 1.35
+gamma_G_gynnsam = 1.00
+gamma_Q = 0.0
+har_variabel_last = false
+
+# ---------------------------------------------------------------------------
+# Tabell 3:6 — Lastkombinationsfaktorer för klimatlaster
+#
+# Snöbanden anges som "snözon", ett ord som förekommer på exakt ETT ställe
+# i hela författningen — just den här tabellen. Kartan i figur 4:2 är
+# märkt "Karakteristiska värden för snölast på mark, S0" och dess
+# värdemängd {1; 1,5; 2; 2,5; 3; 3,5; 4; 4,5; 5,5} sammanfaller med
+# bandgränserna. Att snözon n är detsamma som S_0 = n kN/m2 är därmed
+# den enda rimliga läsningen, men den är HÄRLEDD och redovisas som ett
+# antagande i varje körning.
+# ---------------------------------------------------------------------------
+
+[klimatlast.sno_zon_1]
+namn = "Snölast i snözon 1 och 1,5"
+S_0_max = 1.5
+psi0 = 0.6
+psi1 = 0.3
+psi2 = 0.1
+
+[klimatlast.sno_zon_2]
+namn = "Snölast i snözon 2 och 2,5"
+S_0_max = 2.5
+psi0 = 0.7
+psi1 = 0.4
+psi2 = 0.2
+
+[klimatlast.sno_zon_3]
+namn = "Snölast i snözon 3 och uppåt"
+S_0_max = 1e9
+psi0 = 0.8
+psi1 = 0.6
+psi2 = 0.2
+
+[klimatlast.vind]
+namn = "Vindlast"
+psi0 = 0.3
+psi1 = 0.2
+psi2 = 0.0
+
+[klimatlast.temperatur]
+namn = "Temperaturlast"
+psi0 = 0.6
+psi1 = 0.5
+psi2 = 0.0
+
+# ---------------------------------------------------------------------------
+# 4 kap. 38 § — vindens karakteristiska hastighetstryck
+#
+#   q_pk(z) = [1 + 2*k_p*I_v(z)] * [k_r*ln(z/z0)*c_0(z)]^2 * q_b
+#   I_v(z)  = 1 / (c_0(z)*ln(z/z0))
+#   k_r     = 0,19 * (z0/z0_ref)^0,07
+#   q_b     = 0,5 * rho * v_b^2
+#   För z < z_min gäller q_pk(z) = q_pk(z_min).
+#
+# "Spetsfaktorn är 3,0 för byggnader och bärverksdelar när hänsyn till
+#  egenfrekvens inte behöver beaktas."
+# "Topografifaktorn är 1 om topografin inte behöver beaktas."
+# ---------------------------------------------------------------------------
+
+[vind]
+rho = 1.25          # kg/m3, luftens densitet (38 §)
+k_p = 3.0           # spetsfaktor utan dynamisk respons (38 §)
+z0_ref = 0.05       # m, referensråhetslängd (38 §)
+
+# Tabell 4:4 — terrängtyper. Beskrivningarna är verbala och i praktiken
+# riktningsberoende; VALET är konstruktörens och får inget tyst förval.
+[terrang.0]
+namn = "0 — Havs- eller kustområde exponerat för öppet hav"
+z0 = 0.003
+z_min = 1.0
+
+[terrang.I]
+namn = "I — Sjö eller plant område med försumbar vegetation, utan hinder"
+z0 = 0.01
+z_min = 1.0
+
+[terrang.II]
+namn = "II — Låg vegetation, enstaka hinder med inbördes avstånd >= 20x höjden"
+z0 = 0.05
+z_min = 2.0
+
+[terrang.III]
+namn = "III — Vegetation eller byggnader, byar, förorter, skogsmark"
+z0 = 0.3
+z_min = 5.0
+
+[terrang.IV]
+namn = "IV — Minst 15 % bebyggd area med medelhöjd över 15 m"
+z0 = 1.0
+z_min = 10.0
+
+# Tabell 3:5 — nyttiga laster. Bara kategori H (yttertak) behövs här.
+[nyttig_last.H]
+namn = "Nyttig last på yttertak"
+psi0 = 0.0
+psi1 = 0.0
+psi2 = 0.0

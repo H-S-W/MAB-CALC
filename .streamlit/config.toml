@@ -1,0 +1,17 @@
+# Streamlit-konfiguration.
+#
+# Ingenting av det som matas in i appen lamnar datorn. Statistikutskicket
+# som Streamlit gor som standard ar avstangt nedan.
+
+[browser]
+gatherUsageStats = false
+
+[server]
+# Appen ar avsedd att koras lokalt.
+address = "localhost"
+headless = true
+# Serverar ./static (plotly.min.js till 3D-modellen) -- lokalt, inget CDN.
+enableStaticServing = true
+
+[theme]
+base = "light"
