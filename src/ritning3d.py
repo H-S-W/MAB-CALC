@@ -513,11 +513,14 @@ var LUGN = 10;
 // Perspektiv: dampat wheel-event till plotly. Ortografiskt: plotlys
 // zoom ar ett FAST steg per event oavsett delta, sa dar skalas
 // aspectratio direkt med tiondelssteg -- samma mekanism som plotly.
-function zooma(steg, cx, cy) {
+function zooma(steg, cx, cy, dampa) {
+  // dampa=false: pinch ar en direkt handrorelse och ska folja
+  // fingrarna 1:1 -- dampningen galler bara hjul och knappar
+  var div = dampa === false ? 1 : LUGN;
   try {
     var scen = gd._fullLayout.scene && gd._fullLayout.scene._scene;
     if (scen && scen.camera && scen.camera._ortho) {
-      var s = Math.pow(1.1, steg / LUGN);
+      var s = Math.pow(1.1, steg / div);
       var l = scen.glplot.getAspectratio();
       scen.glplot.setAspectratio({ x: s * l.x, y: s * l.y, z: s * l.z });
       return;
@@ -526,7 +529,7 @@ function zooma(steg, cx, cy) {
   var mal = gd.querySelector('canvas') || gd;
   var r = mal.getBoundingClientRect();
   var ev = new WheelEvent('wheel', {
-    deltaY: 100 * steg / LUGN, deltaX: 0,
+    deltaY: 100 * steg / div, deltaX: 0,
     clientX: cx != null ? cx : r.left + r.width / 2,
     clientY: cy != null ? cy : r.top + r.height / 2,
     bubbles: true, cancelable: true, view: window });
@@ -559,8 +562,9 @@ gd.addEventListener('pointermove', function (e) {
   var pts = Array.from(pekare.values());
   var d = Math.hypot(pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]);
   if (pinchAvstand !== null && d > 0) {
-    zooma((pinchAvstand - d) / 4,
-          (pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2);
+    zooma((pinchAvstand - d) / 25,
+          (pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2,
+          false);
     e.preventDefault();
   }
   pinchAvstand = d;
